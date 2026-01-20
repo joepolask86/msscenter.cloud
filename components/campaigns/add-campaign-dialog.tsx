@@ -1,0 +1,248 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { Niche, Network, Server } from "@/lib/types"
+import { api } from "@/lib/api-client"
+
+interface AddCampaignDialogProps {
+    open: boolean
+    onOpenChange: (open: boolean) => void
+}
+
+export function AddCampaignDialog({ open, onOpenChange }: AddCampaignDialogProps) {
+    const [loading, setLoading] = useState(false)
+    const [niches, setNiches] = useState<Niche[]>([])
+    const [networks, setNetworks] = useState<Network[]>([])
+    const [servers, setServers] = useState<Server[]>([])
+
+    // Form inputs
+    const [formData, setFormData] = useState({
+        campaignName: "", // Optional, backend auto-generates MSS-ID
+        url: "",
+        fullUrl: "",
+        networkId: "",
+        nicheId: "",
+        serverId: "",
+    })
+
+    const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+        if (open) {
+            setError(null)
+            fetchOptions()
+            // Reset form on open
+            setFormData({
+                campaignName: "",
+                url: "",
+                fullUrl: "",
+                networkId: "",
+                nicheId: "",
+                serverId: "",
+            })
+        }
+    }, [open])
+
+    const fetchOptions = async () => {
+        try {
+            const [nichesRes, networksRes, serversRes] = await Promise.all([
+                api.get<{ niches: Niche[] }>('/niches?limit=1000&status=true'),
+                api.get<{ networks: Network[] }>('/networks/active'),
+                api.get<{ servers: Server[] }>('/servers/active')
+            ])
+            setNiches(nichesRes.niches)
+            setNetworks(networksRes.networks)
+            setServers(serversRes.servers)
+        } catch (error) {
+            console.error("Failed to fetch options:", error)
+        }
+    }
+
+    const handleChange = (field: string, value: any) => {
+        setFormData(prev => ({ ...prev, [field]: value }))
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setError(null)
+        try {
+            setLoading(true)
+            const payload = {
+                campaign_url: formData.url,
+                website_fullurl: formData.fullUrl,
+                cserver_id: Number(formData.serverId),
+                cnetwork_id: Number(formData.networkId),
+                cniche_id: Number(formData.nicheId),
+
+                // Defaults for hidden fields
+                status: 3, // Pending
+                country: "US",
+                tracknumber: "", // Required by DB
+                indexer: false,
+                rating: false,
+                msstype: 1,
+                searchconsole: false,
+                bing: false,
+                bulidinfo: "",
+            }
+
+            await api.post('/campaigns', payload)
+            onOpenChange(false)
+        } catch (error: any) {
+            const isDuplicate = (error as any)?.status === 409 ||
+                error?.message?.includes('already exists') ||
+                error?.message?.includes('Conflict');
+
+            // Only log actual unexpected errors to console
+            if (!isDuplicate) {
+                console.error("Failed to create campaign:", error)
+            }
+
+            if (isDuplicate) {
+                setError(error.message || "Campaign with this website URL already exists!")
+            } else {
+                setError(error.message || "Failed to create campaign. Please try again.")
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-2xl top-[5%] !translate-y-0 flex flex-col p-0 gap-0">
+                <DialogHeader className="py-4 px-6 border-b shrink-0">
+                    <DialogTitle className="text-primary text-xl">Add New Campaign</DialogTitle>
+                </DialogHeader>
+
+                {error && (
+                    <div className="bg-destructive/15 text-destructive text-sm p-3 mx-6 mt-4 rounded-md font-medium">
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+                    <div className="overflow-y-auto flex-1 px-6">
+                        <div className="grid grid-cols-2 gap-4 py-4 space-y-2">
+                            {/* Campaign Name - ReadOnly or AutoGenerated Message */}
+                            <div className="grid gap-2 col-span-2">
+                                <Label htmlFor="campaign-name">Campaign Name</Label>
+                                <Input
+                                    id="campaign-name"
+                                    value={formData.campaignName}
+                                    placeholder="Auto-generated (WLAP Plumbing MSS-17)"
+                                    disabled
+                                    className="w-[300px]"
+                                />
+                            </div>
+
+                            {/* Website URL */}
+                            <div className="grid gap-2">
+                                <Label htmlFor="website-url">Website URL</Label>
+                                <Input
+                                    id="website-url"
+                                    value={formData.url}
+                                    onChange={(e) => handleChange('url', e.target.value)}
+                                    placeholder="yourdomain.com"
+                                    required
+                                />
+                            </div>
+
+                            {/* Website Full URL */}
+                            <div className="grid gap-2">
+                                <Label htmlFor="website-full-url">Website Full URL</Label>
+                                <Input
+                                    id="website-full-url"
+                                    value={formData.fullUrl}
+                                    onChange={(e) => handleChange('fullUrl', e.target.value)}
+                                    placeholder="http://www.yourdomain.com"
+                                    required
+                                />
+                            </div>
+
+                            {/* Affiliate Network */}
+                            <div className="grid gap-2">
+                                <Label htmlFor="affiliate-network">Affiliate Network</Label>
+                                <Select
+                                    value={formData.networkId}
+                                    onValueChange={(val) => handleChange('networkId', val)}
+                                    required
+                                >
+                                    <SelectTrigger id="affiliate-network" className="w-[220px]">
+                                        <SelectValue placeholder="Select affiliate network" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {networks.map(n => (
+                                            <SelectItem key={n.id} value={String(n.id)}>{n.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Niche */}
+                            <div className="grid gap-2">
+                                <Label htmlFor="niche">Niche</Label>
+                                <Select
+                                    value={formData.nicheId}
+                                    onValueChange={(val) => handleChange('nicheId', val)}
+                                    required
+                                >
+                                    <SelectTrigger id="niche" className="w-[220px]">
+                                        <SelectValue placeholder="Select niche" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {niches.map(n => (
+                                            <SelectItem key={n.id} value={String(n.id)}>{n.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Server */}
+                            <div className="grid gap-2">
+                                <Label htmlFor="server">Server</Label>
+                                <Select
+                                    value={formData.serverId}
+                                    onValueChange={(val) => handleChange('serverId', val)}
+                                    required
+                                >
+                                    <SelectTrigger id="server" className="w-[220px]">
+                                        <SelectValue placeholder="Select domain server" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {servers.map(s => (
+                                            <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="py-4 px-6 border-t shrink-0">
+                        <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={loading}>
+                            {loading ? "Creating New Campaign..." : "Create Campaign"}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    )
+}
