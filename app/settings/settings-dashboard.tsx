@@ -1,14 +1,24 @@
 "use client"
- 
+
 import React, { useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import { ChevronRight, CloudBackup } from "lucide-react"
+import { ChevronRight, CloudBackup, Bot, BrainCircuit, Cloud, ShieldBan } from "lucide-react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { CalendarDatePicker } from "@/components/earnings/date-range-picker"
 import { api } from "@/lib/api-client"
 
@@ -130,7 +140,7 @@ export function SettingsDashboard() {
                 Manage MSSCenter tools, integrations, and data sync preferences from this page.
               </p>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="columns-1 gap-4 md:columns-2 [&>*]:break-inside-avoid [&>*]:mb-4">
                 <Card className="pt-0">
                   <CardHeader className="flex flex-row items-center justify-between border-b !py-4">
                     <div className="flex items-center gap-2">
@@ -198,6 +208,101 @@ export function SettingsDashboard() {
                         )}
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
+
+                {/* LLM Settings Card */}
+                <Card className="pt-0">
+                  <CardHeader className="flex flex-row items-center justify-between border-b !py-4">
+                    <div className="flex items-center gap-2">
+                      <Bot className="text-primary" />
+                      <CardTitle className="text-primary">LLM (AI Tools)</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="py-1 px-6 space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="openrouter-key" className="mb-4">OpenRouter API Key</Label>
+                      <Input id="openrouter-key" type="password" placeholder="sk-or-..." />
+                      <p className="text-xs text-muted-foreground">Required for AI content generation when building websites.</p>
+                      <p className="text-sm">Remaining OpenRouter Credits: <span className="text-primary">$18.69</span></p>
+                    </div>
+                    <Button className="w-full md:w-auto cursor-pointer">Save API Key</Button>
+                  </CardContent>
+                </Card>
+
+                {/* NLP Settings Card */}
+                <Card className="pt-0">
+                  <CardHeader className="flex flex-row items-center justify-between border-b !py-4">
+                    <div className="flex items-center gap-2">
+                      <BrainCircuit className="text-primary" />
+                      <CardTitle className="text-primary">NLP (Entity Extraction)</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="py-4 px-6 pt-0 space-y-4">
+                    <p className="text-sm text-muted-foreground">Uses this to detects people, places, brands, and events in text and enriches them with useful entities and topics.</p>
+                    <div className="space-y-2">
+                      <Label htmlFor="textrazor-key" className="mb-4">TextRazor API Key</Label>
+                      <Input id="textrazor-key" type="password" placeholder="TextRazor API Key" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="dandelion-key" className="mb-4">Dandelion API Key</Label>
+                      <Input id="dandelion-key" type="password" placeholder="Dandelion API Key" />
+                    </div>
+                    <Button className="w-full md:w-auto cursor-pointer">Save API Key</Button>
+                  </CardContent>
+                </Card>
+
+                {/* Cloud Settings Card */}
+                <Card className="pt-0">
+                  <CardHeader className="flex flex-row items-center justify-between border-b !py-4">
+                    <div className="flex items-center gap-2">
+                      <Cloud className="text-primary" />
+                      <CardTitle className="text-primary">Cloud Deployment</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="py-0 px-6 space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="netlify-token" className="mb-4">Netlify Access Token</Label>
+                      <Input id="netlify-token" type="password" placeholder="Netlify Access Token" />
+                      <p className="text-sm text-muted-foreground">Create a token in Netlify User Settings → Applications → Personal access tokens.</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="github-token" className="mb-4">GitHub Token</Label>
+                      <Input id="github-token" type="password" placeholder="GitHub Token" />
+                      <p className="text-sm text-muted-foreground">Create a token in GitHub Settings → Developer settings → Personal access tokens.</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="cloudflare-token" className="mb-4">Cloudflare Token</Label>
+                      <Input id="cloudflare-token" type="password" placeholder="Cloudflare Token" />
+                      <p className="text-sm text-muted-foreground">Create a token in Cloudflare API Tokens.</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="vercel-token" className="mb-4">Vercel Access Token</Label>
+                      <Input id="vercel-token" type="password" placeholder="Vercel Access Token" />
+                    </div>
+                    <Button className="w-full md:w-auto cursor-pointer">Save Access Keys</Button>
+                  </CardContent>
+                </Card>
+
+                {/* Blocked Sites Card */}
+                <Card className="pt-0">
+                  <CardHeader className="flex flex-row items-center justify-between border-b !py-4">
+                    <div className="flex items-center gap-2">
+                      <ShieldBan className="text-primary" />
+                      <CardTitle className="text-primary">Blocked Sites (SERP Exclusion)</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="py-1 px-6 space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="blocked-sites" className="mb-4">Domains to Ignore (one per line)</Label>
+                      <Textarea
+                        id="blocked-sites"
+                        placeholder={"yelp.com\nyoutube.com\nfacebook.com etc.."}
+                        className="min-h-[150px] font-mono"
+                      />
+                      <p className="text-sm text-muted-foreground">These domains will be skipped during SERP analysis and competitor research.</p>
+                    </div>
+                    <Button className="w-full md:w-auto cursor-pointer">Save Block List</Button>
                   </CardContent>
                 </Card>
               </div>

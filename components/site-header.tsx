@@ -21,6 +21,9 @@ const pageTitles: Record<string, string> = {
   "/sitemap-scraper": "Sitemap Scraper",
   "/brand-finder": "Brand Backlink Finder",
   "/settings": "Settings",
+  "/project-planner": "Project Planner",
+  "/local-sites-pro": "Local Sites Pro",
+  "/research": "Research Overview",
 }
 
 export function SiteHeader() {
@@ -41,6 +44,62 @@ export function SiteHeader() {
     // /campaigns/taskdetails/[id] - Campaign Tasks
     if (pathParts.length === 4 && pathParts[2] === "taskdetails") {
       pageTitle = "Campaign Tasks"
+    }
+  }
+
+  // Check for research routes: /research/[projectId]/[page]
+  if (!pageTitle && pathname.startsWith("/research/")) {
+    const pathParts = pathname.split("/").filter(Boolean)
+
+    // /research/[projectId]/overview
+    if (pathParts.length >= 3 && pathParts[2] === "overview") {
+      pageTitle = "Research Overview"
+    }
+    // /research/[projectId]/serp
+    else if (pathParts.length >= 3 && pathParts[2] === "serp") {
+      pageTitle = "SERP Analysis"
+    }
+    // /research/[projectId]/entities
+    else if (pathParts.length >= 3 && pathParts[2] === "entities") {
+      pageTitle = "Entity Map"
+    }
+    // /research/[projectId]/site-plan
+    else if (pathParts.length >= 3 && pathParts[2] === "site-plan") {
+      pageTitle = "Site Structure"
+    }
+    // /research/[projectId]/content-briefs
+    else if (pathParts.length >= 3 && pathParts[2] === "content-briefs") {
+      pageTitle = "Content Briefs"
+    }
+    // Default for any other research page
+    else if (pathParts.length >= 2) {
+      pageTitle = "Research Project"
+    }
+  }
+
+  // Check for local sites pro routes: /local-sites-pro/[siteId]/[page]
+  if (!pageTitle && pathname.startsWith("/local-sites-pro/")) {
+    const pathParts = pathname.split("/").filter(Boolean)
+
+    // /local-sites-pro/[siteId]/details
+    if (pathParts.length >= 3 && pathParts[2] === "details") {
+      pageTitle = "Site Details"
+    }
+    // /local-sites-pro/[siteId]/build-settings
+    else if (pathParts.length >= 3 && pathParts[2] === "build-settings") {
+      pageTitle = "Build Settings"
+    }
+    // /local-sites-pro/[siteId]/builder
+    else if (pathParts.length >= 3 && pathParts[2] === "builder") {
+      pageTitle = "Site Builder"
+    }
+    // /local-sites-pro/[siteId]/preview
+    else if (pathParts.length >= 3 && pathParts[2] === "preview") {
+      pageTitle = "Site Preview"
+    }
+    // Default for any other local sites pro page
+    else if (pathParts.length >= 2) {
+      pageTitle = "Local Sites Pro"
     }
   }
 

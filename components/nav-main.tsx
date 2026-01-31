@@ -32,6 +32,7 @@ export function NavMain({
     url: string
     icon?: LucideIcon
     isActive?: boolean
+    matchPaths?: string[] // Additional paths that should make this item active
     items?: {
       title: string
       url: string
@@ -42,13 +43,18 @@ export function NavMain({
   const pathname = usePathname()
 
   // Helper function to check if a menu item should be active
-  const isItemActive = (itemUrl: string) => {
+  const isItemActive = (item: typeof items[0]) => {
     // Exact match
-    if (pathname === itemUrl) return true
+    if (pathname === item.url) return true
 
     // Check if current path is a child of this item's URL
     // e.g., /campaigns/1 should make /campaigns active
-    if (pathname.startsWith(itemUrl + "/")) return true
+    if (pathname.startsWith(item.url + "/")) return true
+
+    // Check matchPaths if provided
+    if (item.matchPaths) {
+      return item.matchPaths.some(matchPath => pathname.startsWith(matchPath))
+    }
 
     return false
   }
@@ -56,7 +62,7 @@ export function NavMain({
   // Helper function to check if a collapsible parent should be active
   const isParentActive = (item: typeof items[0]) => {
     // Check if main item is active
-    if (isItemActive(item.url)) return true
+    if (isItemActive(item)) return true
 
     // Check if any sub-item is active
     if (item.items) {
@@ -103,10 +109,10 @@ export function NavMain({
               </Collapsible>
             ) : (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild tooltip={item.title} isActive={isItemActive(item.url)}>
+                <SidebarMenuButton asChild tooltip={item.title} isActive={isItemActive(item)}>
                   <Link href={item.url}>
-                    {item.icon && <item.icon className={isItemActive(item.url) ? "text-primary" : ""} />}
-                    <span className={isItemActive(item.url) ? "text-primary" : ""}>{item.title}</span>
+                    {item.icon && <item.icon className={isItemActive(item) ? "text-primary" : ""} />}
+                    <span className={isItemActive(item) ? "text-primary" : ""}>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

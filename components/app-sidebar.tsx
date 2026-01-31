@@ -20,6 +20,7 @@ import {
   DollarSignIcon,
   ToolCase,
   Bot,
+  Rocket,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -125,8 +126,14 @@ const data = {
   rankandrent: [
     {
       title: "Project Planner",
-      url: "#",
+      url: "/project-planner",
       icon: Atom,
+      matchPaths: ["/research"], // Also match /research routes
+    },
+    {
+      title: "Local Site Builder",
+      url: "/local-sites-pro",
+      icon: Rocket,
     },
   ],
   // Tools section
@@ -146,11 +153,6 @@ const data = {
         },
       ],
     },
-    // {
-    //   title: "AI SEO Lab",
-    //   url: "#",
-    //   icon: Bot,
-    // },
   ],
 }
 
@@ -187,7 +189,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain title="Call Activities" items={data.callactivities} className="text-sm text-gray-400" />
         <NavMain title="Earnings" items={data.earnings} className="text-sm text-gray-400" />
         <NavMain title="Cloud" items={data.cloud} className="text-sm text-gray-400" />
-        {/* <NavMain title="Research" items={data.rankandrent} className="text-sm text-gray-400" /> */}
+        <NavMain title="Rank & Rent" items={data.rankandrent} className="text-sm text-gray-400" />
         <NavMain title="Tools" items={data.tools} className="text-sm text-gray-400" />
       </SidebarContent>
       <SidebarFooter>

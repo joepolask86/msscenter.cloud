@@ -93,7 +93,7 @@ export function LoginForm({
               <Field>
                 <Button type="submit" disabled={loading} className="w-full">
                   <Lock />
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                   {loading ? "Logging in..." : "Login"}
                 </Button>
               </Field>
